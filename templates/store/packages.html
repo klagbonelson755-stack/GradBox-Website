@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Packages - GradBox{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Our Product Packages</h2>
+    <p class="text-center text-muted mb-5">Select from our curated packages - all items included in one bundle!</p>
+
+    <!-- Category Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group flex-wrap" role="group">
+                <a href="{% url 'packages' %}"
+                    class="btn btn-outline-primary {% if not category_filter %}active{% endif %}">All</a>
+                <a href="{% url 'packages' %}?category=facials"
+                    class="btn btn-outline-primary {% if category_filter == 'facials' %}active{% endif %}">
+                    <i class="fas fa-spa"></i> Facials
+                </a>
+                <a href="{% url 'packages' %}?category=foodstuffs"
+                    class="btn btn-outline-primary {% if category_filter == 'foodstuffs' %}active{% endif %}">
+                    <i class="fas fa-utensils"></i> Foodstuffs
+                </a>
+                <a href="{% url 'packages' %}?category=phone"
+                    class="btn btn-outline-primary {% if category_filter == 'phone' %}active{% endif %}">
+                    <i class="fas fa-mobile-alt"></i> Phone
+                </a>
+                <a href="{% url 'packages' %}?category=breakfast"
+                    class="btn btn-outline-primary {% if category_filter == 'breakfast' %}active{% endif %}">
+                    <i class="fas fa-coffee"></i> Breakfast
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="row g-4">
+        {% for package in packages %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card package-card h-100">
+                <img src="{{ package.image_url }}" class="card-img-top" alt="{{ package.name }}"
+                    onerror="this.src='https://via.placeholder.com/300x200?text={{ package.category|title }}'">
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">{{ package.get_category_display }}</span>
+                    <h5 class="card-title">{{ package.name }}</h5>
+                    <p class="card-text text-muted small">{{ package.description|truncatechars:60 }}</p>
+
+                    <!-- Items List -->
+                    <div class="mb-3">
+                        <small class="text-muted"><strong>Includes:</strong></small>
+                        <ul class="list-unstyled mb-0 small">
+                            {% for item in package.items %}
+                            <li><i class="fas fa-check text-success"></i> {{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="price-tag">GH₵ {{ package.price }}</span>
+                            {% if user.is_authenticated and user.profile.is_student and user.profile.is_verified %}
+                            <div class="student-price">Student: GH₵ {{ package.get_student_price }}</div>
+                            <span class="discount-badge">40% OFF</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart Form -->
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'add_to_cart' package.id %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" name="select_package"
+                                id="package{{ package.id }}" value="{{ package.id }}">
+                            <label class="form-check-label" for="package{{ package.id }}">
+                                Select this package
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-sign-in-alt"></i> Login to Order
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No packages available in this category yet.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
