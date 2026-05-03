@@ -1,0 +1,1 @@
+web: gunicorn gradbox.wsgi --log-file - --bind 0.0.0.0:\n
