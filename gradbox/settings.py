@@ -4,6 +4,7 @@ Django settings for gradbox project.
 
 from pathlib import Path
 import os
+PORT = os.environ.get('PORT', '8000')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
